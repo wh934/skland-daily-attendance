@@ -2,7 +2,7 @@
   "name": "skland-daily-attendance",
   "type": "module",
   "version": "1.0.0",
-  "packageManager": "pnpm@9.7.0",
+  "packageManager": "pnpm@9.10.0",
   "description": "",
   "author": "",
   "license": "MIT",
