@@ -35,11 +35,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: setting proxy
-        run:
-          echo "http_proxy=72.10.160.171:10095" >> $GITHUB_ENV
-          echo "https_proxy=72.10.160.171:10095" >> $GITHUB_ENV
-          echo "all_proxy=72.10.160.171:10095" >> $GITHUB_ENV
+      # - name: setting proxy
+      #   run:
+      #     echo "http_proxy=72.10.160.171:10095" >> $GITHUB_ENV
+      #     echo "https_proxy=72.10.160.171:10095" >> $GITHUB_ENV
+      #     echo "all_proxy=72.10.160.171:10095" >> $GITHUB_ENV
+        
 
       - name: Install dependencies
         run: pnpm install
