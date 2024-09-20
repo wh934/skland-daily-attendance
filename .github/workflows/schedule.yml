@@ -35,26 +35,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      # 新增步骤：获取并设置可用的 ProxyScrape 代理
-      - name: Set ProxyScrape Proxy with Connectivity Check
-        run: |
-          # 获取代理列表
-          PROXIES=$(curl -s "https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all")
-
-          # 遍历代理列表并检测连通性
-          for PROXY in $PROXIES; do
-            echo "尝试代理: $PROXY"
-            # 检测代理连通性（访问Google）
-            if curl -x $PROXY -s https://www.google.com -o /dev/null; then
-              echo "代理 $PROXY 可用，设置为环境变量"
-              echo "http_proxy=$PROXY" >> $GITHUB_ENV
-              echo "https_proxy=$PROXY" >> $GITHUB_ENV
-              echo "all_proxy=$PROXY" >> $GITHUB_ENV
-              break
-            else
-              echo "代理 $PROXY 不可用，尝试下一个..."
-            fi
-          done
+      - name: setting proxy
+        run:
+          echo "http_proxy=$PROXY" >> $GITHUB_ENV
+          echo "https_proxy=$PROXY" >> $GITHUB_ENV
+          echo "all_proxy=$PROXY" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: pnpm install
