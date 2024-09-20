@@ -8,7 +8,12 @@ jobs:
   attendance:
     strategy:
       matrix:
-        runner: [ubuntu-latest-4-cores-ap-southeast-1]
+        runner: [
+          ubuntu-latest-16-cores-af-south-1,
+          ubuntu-latest-16-cores-me-south-1,
+          ubuntu-latest-16-cores-eu-south-1
+        ]
+      fail-fast: false
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout
