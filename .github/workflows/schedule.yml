@@ -37,9 +37,9 @@ jobs:
 
       - name: setting proxy
         run:
-          echo "http_proxy=$PROXY" >> $GITHUB_ENV
-          echo "https_proxy=$PROXY" >> $GITHUB_ENV
-          echo "all_proxy=$PROXY" >> $GITHUB_ENV
+          echo "http_proxy=72.10.160.171:10095" >> $GITHUB_ENV
+          echo "https_proxy=72.10.160.171:10095" >> $GITHUB_ENV
+          echo "all_proxy=72.10.160.171:10095" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: pnpm install
