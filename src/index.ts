@@ -43,9 +43,9 @@ export async function doAttendanceForAccount(token: string, options: Options) {
           )
         }
         // quit with error
-        if (hasError)
-          process.exit(1)
-      }
+      //   if (hasError)
+      //     process.exit(1)
+      // }
     const add = (message: string) => {
       messages.push(message)
     }
