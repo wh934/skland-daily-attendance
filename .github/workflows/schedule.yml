@@ -1,5 +1,4 @@
 name: attendance
-
 on:
   schedule:
     - cron: '43 2 * * *'
@@ -35,15 +34,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      # - name: setting proxy
-      #   run:
-      #     echo "http_proxy=72.10.160.171:10095" >> $GITHUB_ENV
-      #     echo "https_proxy=72.10.160.171:10095" >> $GITHUB_ENV
-      #     echo "all_proxy=72.10.160.171:10095" >> $GITHUB_ENV
-        
-
       - name: Install dependencies
         run: pnpm install
+
+      - name: Setup VMess Proxy
+        env:
+          VMESS_CONFIG: ${{ secrets.VMESS_CONFIG }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+          curl -L -o v2ray.zip https://github.com/v2fly/v2ray-core/releases/latest/download/v2ray-linux-64.zip
+          unzip v2ray.zip
+          echo "$VMESS_CONFIG" > config.json
+          ./v2ray run -config config.json &
+          sleep 5
+          echo "all_proxy=socks5://127.0.0.1:1080" >> $GITHUB_ENV
 
       - name: Run daily attendance
         run: pnpm attendance
@@ -52,3 +57,4 @@ jobs:
           SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
           BARK_URL: ${{ secrets.BARK_URL }}
           SELECT_CHANNEL: ${{ secrets.SELECT_CHANNEL }}
+          all_proxy: ${{ env.all_proxy }}
