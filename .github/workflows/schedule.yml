@@ -37,6 +37,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Setup V2Ray
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+          curl -L -o v2ray.zip https://github.com/v2fly/v2ray-core/releases/latest/download/v2ray-linux-64.zip
+          unzip v2ray.zip
+
       - name: Run attendance for each token
         env:
           SKLAND_TOKENS: ${{ secrets.SKLAND_TOKENS }}
@@ -45,16 +52,11 @@ jobs:
           BARK_URL: ${{ secrets.BARK_URL }}
           SELECT_CHANNEL: ${{ secrets.SELECT_CHANNEL }}
         run: |
-          sudo apt-get update
-          sudo apt-get install -y curl jq
-          curl -L -o v2ray.zip https://github.com/v2fly/v2ray-core/releases/latest/download/v2ray-linux-64.zip
-          unzip v2ray.zip
-
           IFS=',' read -ra TOKENS <<< "$SKLAND_TOKENS"
           IFS=',' read -ra CONFIGS <<< "$VMESS_CONFIGS"
 
           for i in "${!TOKENS[@]}"; do
-            echo "Processing token ${i+1}"
+            echo "处理 token ${i+1}"
             
             # 设置当前的 VMess 配置
             echo "${CONFIGS[$i]}" > config.json
@@ -77,5 +79,5 @@ jobs:
             # 清除代理设置
             unset all_proxy
             
-            echo "Finished processing token ${i+1}"
+            echo "完成处理 token ${i+1}"
           done
