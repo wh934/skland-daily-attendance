@@ -1,5 +1,4 @@
 name: attendance
-
 on:
   schedule:
     - cron: '43 2 * * *'
@@ -8,9 +7,6 @@ on:
 jobs:
   attendance:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        index: [0, 1, 2]  # 按顺序使用3个不同的skland_token
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,22 +39,12 @@ jobs:
 
       - name: Setup VMess Proxy
         env:
-          VMESS_CONFIGS: ${{ secrets.VMESS_CONFIGS }}
-          SKLAND_TOKENS: ${{ secrets.SKLAND_TOKENS }}
+          VMESS_CONFIG: ${{ secrets.VMESS_CONFIG }}
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl jq
+          sudo apt-get install -y curl
           curl -L -o v2ray.zip https://github.com/v2fly/v2ray-core/releases/latest/download/v2ray-linux-64.zip
           unzip v2ray.zip
-
-          # 解析 VMESS_CONFIGS 和 SKLAND_TOKENS
-          echo "$VMESS_CONFIGS" > vmess_configs.json
-          TOKENS=(${{ secrets.SKLAND_TOKENS }})
-
-          # 根据矩阵 index 来选取对应的 token 和 v2ray 配置
-          CURRENT_TOKEN=${TOKENS[${{ matrix.index }}]}
-          VMESS_CONFIG=$(jq -r --arg index "${{ matrix.index }}" '.["token" + $index]' vmess_configs.json)
-
           echo "$VMESS_CONFIG" > config.json
           ./v2ray run -config config.json &
           sleep 5
@@ -67,7 +53,7 @@ jobs:
       - name: Run daily attendance
         run: pnpm attendance
         env:
-          SKLAND_TOKEN: ${{ secrets.SKLAND_TOKENS }}.split(",")[${{ matrix.index }}]  # 使用不同的 token
+          SKLAND_TOKEN: ${{ secrets.SKLAND_TOKEN }}
           SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
           BARK_URL: ${{ secrets.BARK_URL }}
           SELECT_CHANNEL: ${{ secrets.SELECT_CHANNEL }}
