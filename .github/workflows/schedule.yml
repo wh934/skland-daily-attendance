@@ -1,29 +1,35 @@
 name: attendance
+
 on:
   schedule:
     - cron: '43 2 * * *'
   workflow_dispatch:
+
 jobs:
   attendance:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        skland_token: ${{ split(secrets.SKLAND_TOKENS, ',') }}
+        index: [0, 1, 2]  # 按顺序使用3个不同的skland_token
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18.18.2
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           run_install: false
+
       - name: Get pnpm store directory
         shell: bash
         run: |
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
       - uses: actions/cache@v4
         name: Setup pnpm cache
         with:
@@ -31,30 +37,37 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
+
       - name: Install dependencies
         run: pnpm install
+
       - name: Setup VMess Proxy
         env:
           VMESS_CONFIGS: ${{ secrets.VMESS_CONFIGS }}
-          CURRENT_SKLAND_TOKEN: ${{ matrix.skland_token }}
+          SKLAND_TOKENS: ${{ secrets.SKLAND_TOKENS }}
         run: |
           sudo apt-get update
           sudo apt-get install -y curl jq
           curl -L -o v2ray.zip https://github.com/v2fly/v2ray-core/releases/latest/download/v2ray-linux-64.zip
           unzip v2ray.zip
-          
-          # 解析 VMESS_CONFIGS JSON 并选择正确的配置
+
+          # 解析 VMESS_CONFIGS 和 SKLAND_TOKENS
           echo "$VMESS_CONFIGS" > vmess_configs.json
-          VMESS_CONFIG=$(jq -r --arg token "$CURRENT_SKLAND_TOKEN" '.[$token]' vmess_configs.json)
-          
+          TOKENS=(${{ secrets.SKLAND_TOKENS }})
+
+          # 根据矩阵 index 来选取对应的 token 和 v2ray 配置
+          CURRENT_TOKEN=${TOKENS[${{ matrix.index }}]}
+          VMESS_CONFIG=$(jq -r --arg index "${{ matrix.index }}" '.["token" + $index]' vmess_configs.json)
+
           echo "$VMESS_CONFIG" > config.json
           ./v2ray run -config config.json &
           sleep 5
           echo "all_proxy=socks5://127.0.0.1:1080" >> $GITHUB_ENV
+
       - name: Run daily attendance
         run: pnpm attendance
         env:
-          SKLAND_TOKEN: ${{ matrix.skland_token }}
+          SKLAND_TOKEN: ${{ secrets.SKLAND_TOKENS }}.split(",")[${{ matrix.index }}]  # 使用不同的 token
           SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
           BARK_URL: ${{ secrets.BARK_URL }}
           SELECT_CHANNEL: ${{ secrets.SELECT_CHANNEL }}
