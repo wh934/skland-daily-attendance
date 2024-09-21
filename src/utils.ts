@@ -3,7 +3,7 @@ import type { FetchContext } from 'ofetch'
 import { stringifyQuery } from 'ufo'
 
 export const command_header = {
-  'User-Agent': 'Skland/1.21.0 (com.hypergryph.skland; build:102100065; iOS 17.6.0; ) Alamofire/5.7.1',
+  'User-Agent': 'Skland/1.24.0 (com.hypergryph.skland; build:102400084; iOS 16.6.1; ) Alamofire/5.7.1',
   'Accept-Encoding': 'gzip',
   'Connection': 'close',
   'Content-Type': 'application/json',
@@ -13,7 +13,7 @@ export const sign_header = {
   platform: '2',
   timestamp: '',
   dId: '',
-  vName: '1.21.0',
+  vName: '1.24.0',
 }
 
 const MILLISECOND_PER_SECOND = 1000
