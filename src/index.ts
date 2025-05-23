@@ -1,14 +1,15 @@
 import process from 'node:process'
 import { setTimeout } from 'node:timers/promises'
 import { attendance, auth, getBinding, signIn } from './api'
-import { bark, serverChan } from './notifications'
-import { getPrivacyName } from './utils'
+import { bark, messagePusher, serverChan } from './notifications'
 
 interface Options {
   /** server 酱推送功能的启用，false 或者 server 酱的token */
   withServerChan?: false | string
   /** bark 推送功能的启用，false 或者 bark 的 URL */
   withBark?: false | string
+  /** 消息推送功能的启用，false 或者 message-pusher 的 WebHook URL */
+  withMessagePusher?: false | string
 }
 
 export async function doAttendanceForAccount(token: string, options: Options) {
@@ -41,6 +42,13 @@ export async function doAttendanceForAccount(token: string, options: Options) {
             messages.join('\n\n'),
           )
         }
+        if (options.withMessagePusher) {
+          await messagePusher(
+            options.withMessagePusher,
+            `【森空岛每日签到】`,
+            messages.join('\n\n'),
+          )
+        }
         // quit with error
         if (hasError)
           process.exit(1)
@@ -55,8 +63,8 @@ export async function doAttendanceForAccount(token: string, options: Options) {
 
   addMessage('## 明日方舟签到')
   let successAttendance = 0
-  const characterList = list.map(i => i.bindingList).flat()
-  const maxRetries = parseInt(process.env.MAX_RETRIES, 10) || 3 // 添加最大重试次数
+  const characterList = list.filter(i => i.appCode === 'arknights').map(i => i.bindingList).flat()
+  const maxRetries = Number.parseInt(process.env.MAX_RETRIES || '3', 10) // 添加最大重试次数
   await Promise.all(characterList.map(async (character) => {
     console.log(`将签到第${successAttendance + 1}个角色`)
     let retries = 0 // 初始化重试计数器
