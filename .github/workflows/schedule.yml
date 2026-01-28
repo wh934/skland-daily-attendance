@@ -4,6 +4,22 @@ on:
   schedule:
     - cron: '0 16 * * *'
   workflow_dispatch:
+  workflow_call:
+    secrets:
+      SKLAND_TOKENS:
+        required: true
+      SKLAND_NOTIFICATION_URLS:
+        required: false
+      SKLAND_ANONYMOUS:
+        required: false
+      MAX_RETRIES:
+        required: false
+    inputs:
+      repository:
+        description: The repository to run the workflow on
+        default: enpitsuLin/skland-daily-attendance
+        required: false
+        type: string
 
 jobs:
   attendance:
@@ -11,11 +27,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repository || github.repository }}
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.9.0
+          node-version: 22.16.0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -39,9 +57,9 @@ jobs:
         run: pnpm install
 
       - name: Run daily attendance
-        run: pnpm attendance
+        run: pnpm action
         env:
-          SKLAND_TOKEN: ${{ secrets.SKLAND_TOKEN }}
-          SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
-          BARK_URL: ${{ secrets.BARK_URL }}
-          SELECT_CHANNEL: ${{ secrets.SELECT_CHANNEL }}
+          SKLAND_TOKENS: ${{ secrets.SKLAND_TOKENS }}
+          SKLAND_NOTIFICATION_URLS: ${{ secrets.SKLAND_NOTIFICATION_URLS }}
+          SKLAND_MAX_RETRIES: ${{ secrets.MAX_RETRIES }}
+          SKLAND_ANONYMOUS: ${{ secrets.SKLAND_ANONYMOUS }}
